@@ -1,143 +1,105 @@
 "use client";
-import Layout from '../components/Layout'
-import AnimatedBackground from '../components/AnimatedBackground'
 
-const wifiPlans = [
-  { label: '1 Hour', price: 'Ksh 10', duration: '1hr', mbs: '20MB' },
-  { label: '2 Hours', price: 'Ksh 15', duration: '2hrs', mbs: '20MB' },
-  { label: '4 Hours', price: 'Ksh 20', duration: '4hrs', mbs: '20MB' },
-  { label: '6 Hours', price: 'Ksh 40', duration: '6hrs', mbs: '20MB' },
-  { label: '12 Hours', price: 'Ksh 55', duration: '12hrs', mbs: '20MB' },
-  { label: '1 Day', price: 'Ksh 70', duration: '24hrs', mbs: '20MB' },
-  { label: '3 Days', price: 'Ksh 130', duration: '72hrs', mbs: '20MB' },
-  { label: '1 Week', price: 'Ksh 190', duration: '168hrs', mbs: '20MB' },
-]
+import { useState } from "react";
 
-export default function WifiBillingPanel() {
+export default function Home() {
+  const [selectedBundle, setSelectedBundle] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const bundles = [
+    { id: 1, name: "250MBs (24hrs)", price: 20 },
+    { id: 2, name: "1.25GB (Till Midnight)", price: 55 },
+    { id: 3, name: "1.5GB (3hrs)", price: 50 },
+    { id: 4, name: "1GB (24hrs)", price: 99 },
+    { id: 5, name: "1GB (1hr)", price: 19 },
+    { id: 6, name: "350MBs (7 days)", price: 49 },
+    { id: 7, name: "45 Minutes (3hrs)", price: 22 },
+    { id: 8, name: "1000 SMS (7 days)", price: 30 },
+    { id: 9, name: "200 SMS (24hrs)", price: 10 },
+    { id: 10, name: "20 SMS (24hrs)", price: 5 }
+  ];
+
+  const submitOrder = async () => {
+    if (!selectedBundle || !phone) {
+      setMessage("Please select a bundle and enter your phone number.");
+      return;
+    }
+
+    setSending(true);
+    setMessage("");
+
+    const res = await fetch("/api/stk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone,
+        amount: selectedBundle.price,
+        bundle: selectedBundle.name
+      })
+    });
+
+    const data = await res.json();
+    setSending(false);
+
+    if (data.success) {
+      setMessage("MPESA Prompt sent! Enter your PIN to complete payment.");
+    } else {
+      setMessage("Failed: " + data.error);
+    }
+  };
+
   return (
-    <>
-      <AnimatedBackground />
-      <Layout>
-        <div className="store-page">
-          <header className="hero">
-            <h1>📡 WiFi Billing Panel</h1>
-            <p>Affordable internet access — pay as you go</p>
-          </header>
+    <main className="flex flex-col items-center px-6 py-10 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold text-center">Bingwa Sokoni Bundles</h1>
+      <p className="text-center text-gray-600 mt-2">
+        Select your bundle and pay via MPESA instantly.
+      </p>
 
-          <section className="plans-grid">
-            {wifiPlans.map((plan, index) => (
-              <div key={index} className="plan-box">
-                <h2>{plan.label}</h2>
-                <p className="price">{plan.price}</p>
-                <p className="details">Max: {plan.mbs}</p>
-                <button className="btn-primary">Buy Now</button>
-              </div>
-            ))}
-          </section>
+      <div className="w-full mt-8 space-y-4">
+        {bundles.map((b) => (
+          <button
+            key={b.id}
+            onClick={() => setSelectedBundle(b)}
+            className={`w-full p-4 rounded-xl border ${
+              selectedBundle?.id === b.id
+                ? "bg-blue-600 text-white border-blue-700"
+                : "bg-white border-gray-300"
+            }`}
+          >
+            <div className="flex justify-between">
+              <span>{b.name}</span>
+              <span className="font-semibold">Ksh {b.price}</span>
+            </div>
+          </button>
+        ))}
+      </div>
 
-          <section className="user-client">
-            <h2>🔐 Login</h2>
-            <form className="auth-form">
-              <input type="text" placeholder="Username" required />
-              <input type="password" placeholder="Password" required />
-              <button className="btn-secondary">Login</button>
-              <p>New here? <a href="#">Register</a></p>
-            </form>
-          </section>
+      <div className="w-full mt-8">
+        <label className="text-sm text-gray-700">Phone Number</label>
+        <input
+          type="tel"
+          placeholder="2547XXXXXXXX"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full mt-1 p-3 border rounded-xl"
+        />
+      </div>
 
-          <section className="mpesa-voucher">
-            <h2>📲 M-Pesa Voucher</h2>
-            <form className="voucher-form">
-              <input type="text" placeholder="Enter Voucher Code" required />
-              <button className="btn-primary">Redeem</button>
-            </form>
-          </section>
+      <button
+        onClick={submitOrder}
+        disabled={sending}
+        className="w-full bg-green-600 text-white py-3 mt-6 rounded-xl font-semibold"
+      >
+        {sending ? "Sending STK..." : "Buy Bundle"}
+      </button>
+
+      {message && (
+        <div className="mt-4 text-center text-sm font-medium text-blue-700">
+          {message}
         </div>
-      </Layout>
-
-      <style jsx>{`
-        .store-page {
-          padding: 2rem;
-          text-align: center;
-        }
-
-        .hero h1 {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .plans-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-          margin: 2rem 0;
-        }
-
-        .plan-box {
-          background: #f9f9f9;
-          border-radius: 8px;
-          padding: 1rem;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease;
-        }
-
-        .plan-box:hover {
-          transform: translateY(-5px);
-        }
-
-        .price {
-          font-size: 1.2rem;
-          margin: 0.5rem 0;
-        }
-
-        .details {
-          font-size: 0.9rem;
-          color: #555;
-        }
-
-        .btn-primary {
-          background: #0070f3;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        .user-client, .mpesa-voucher {
-          margin-top: 3rem;
-        }
-
-        .auth-form, .voucher-form {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          max-width: 300px;
-          margin: auto;
-        }
-
-        .auth-form input, .voucher-form input {
-          padding: 0.5rem;
-          width: 100%;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-
-        .btn-secondary {
-          background: #555;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-
-        a {
-          color: #0070f3;
-          text-decoration: underline;
-        }
-      `}</style>
-    </>
-  )
+      )}
+    </main>
+  );
 }
