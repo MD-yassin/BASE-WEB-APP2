@@ -51,55 +51,59 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center px-6 py-10 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold text-center">Bingwa Sokoni Bundles</h1>
-      <p className="text-center text-gray-600 mt-2">
-        Select your bundle and pay via MPESA instantly.
-      </p>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-10">
+      <div className="max-w-xl w-full bg-white shadow-lg rounded-xl p-8">
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          Bingwa Sokoni Bundles
+        </h1>
+        <p className="text-center text-gray-600 mt-2">
+          Affordable bundles delivered instantly. Select your bundle and pay via MPESA.
+        </p>
 
-      <div className="w-full mt-8 space-y-4">
-        {bundles.map((b) => (
-          <button
-            key={b.id}
-            onClick={() => setSelectedBundle(b)}
-            className={`w-full p-4 rounded-xl border ${
-              selectedBundle?.id === b.id
-                ? "bg-blue-600 text-white border-blue-700"
-                : "bg-white border-gray-300"
-            }`}
-          >
-            <div className="flex justify-between">
-              <span>{b.name}</span>
-              <span className="font-semibold">Ksh {b.price}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div className="w-full mt-8">
-        <label className="text-sm text-gray-700">Phone Number</label>
-        <input
-          type="tel"
-          placeholder="2547XXXXXXXX"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full mt-1 p-3 border rounded-xl"
-        />
-      </div>
-
-      <button
-        onClick={submitOrder}
-        disabled={sending}
-        className="w-full bg-green-600 text-white py-3 mt-6 rounded-xl font-semibold"
-      >
-        {sending ? "Sending STK..." : "Buy Bundle"}
-      </button>
-
-      {message && (
-        <div className="mt-4 text-center text-sm font-medium text-blue-700">
-          {message}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+          {bundles.map((b) => (
+            <button
+              key={b.id}
+              onClick={() => setSelectedBundle(b)}
+              className={`p-4 rounded-xl border transition-colors ${
+                selectedBundle?.id === b.id
+                  ? "bg-blue-600 text-white border-blue-700"
+                  : "bg-white border-gray-300 hover:border-blue-400"
+              }`}
+            >
+              <div className="flex justify-between font-medium">
+                <span>{b.name}</span>
+                <span>Ksh {b.price}</span>
+              </div>
+            </button>
+          ))}
         </div>
-      )}
+
+        <div className="mt-6">
+          <label className="block text-sm text-gray-700 mb-1">Phone Number</label>
+          <input
+            type="tel"
+            placeholder="2547XXXXXXXX"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <button
+          onClick={submitOrder}
+          disabled={sending}
+          className="w-full mt-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition"
+        >
+          {sending ? "Sending STK..." : "Buy Bundle"}
+        </button>
+
+        {message && (
+          <div className="mt-4 text-center text-sm font-medium text-blue-700">
+            {message}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
